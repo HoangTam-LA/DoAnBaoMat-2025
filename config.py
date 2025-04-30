@@ -1,0 +1,1 @@
+ENCRYPTION_METHOD = 'aes'
