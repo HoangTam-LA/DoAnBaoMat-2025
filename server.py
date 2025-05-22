@@ -70,7 +70,6 @@ def handle_client(conn, addr):
         print(f"\n🔄 Xử lý kết nối từ {addr[0]}")
         data = recv_data(conn, method=ENCRYPTION_METHOD)
         print("📊 Dữ liệu nhận được:", data)
-
         feature_names = [
             'ts', 'src_port', 'dst_port', 'duration', 'src_bytes', 
             'dst_bytes', 'missed_bytes', 'src_pkts', 'src_ip_bytes', 
@@ -78,23 +77,18 @@ def handle_client(conn, addr):
             'dns_rcode', 'http_request_body_len', 'http_response_body_len', 
             'http_status_code'
         ]
-        
-        # Kiểm tra số lượng features
         if len(data) != len(feature_names):
             missing = len(feature_names) - len(data)
             data += [0] * missing
             print(f"⚠️ Đã thêm {missing} giá trị mặc định")
-
         input_df = pd.DataFrame([data], columns=feature_names)
         print("\n🔥 Đặc điểm tấn công trong dữ liệu:")
         print(f"- Duration cực ngắn: {input_df['duration'].values[0]}")
         print(f"- Src_bytes cực lớn: {input_df['src_bytes'].values[0]}")
         print(f"- Src_pkts cao: {input_df['src_pkts'].values[0]}")
         print(f"- Tỉ lệ dst/src bytes: {input_df['dst_bytes'].values[0]/input_df['src_bytes'].values[0]:.6f}")
-
         if input_df['src_bytes'].values[0] > 1000000:
             print("⚠️ CẢNH BÁO: Lưu lượng gửi cực lớn - Dấu hiệu DoS")
-        # Dự đoán
         dos_conditions = [
             input_df['duration'].values[0] < 0.1,
             input_df['src_bytes'].values[0] > 1000000,

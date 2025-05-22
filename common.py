@@ -21,8 +21,6 @@ def recvall(sock, n):
 def send_data(sock, data, method=ENCRYPTION_METHOD):
     try:
         print(f"[1/3] Chuẩn bị gửi dữ liệu...")
-        
-        # Mã hóa
         start = time.perf_counter()
         if method == 'aes':
             encrypted = aes_demo.encrypt(str(data))
@@ -31,12 +29,9 @@ def send_data(sock, data, method=ENCRYPTION_METHOD):
         elif method == 'rsa':
             encrypted = rsa_demo.encrypt(str(data))
         print(f"[2/3] Mã hóa {method} xong ({time.perf_counter()-start:.6f}s)")
-
-        # Đóng gói và gửi
         pickled = pickle.dumps(encrypted)
         sock.sendall(struct.pack('>I', len(pickled)) + pickled)
         print(f"[3/3] Đã gửi {len(pickled)} bytes")
-
     except Exception as e:
         print(f"[LỖI] Gửi thất bại: {e}")
         raise
@@ -44,16 +39,10 @@ def send_data(sock, data, method=ENCRYPTION_METHOD):
 def recv_data(sock, method=ENCRYPTION_METHOD):
     try:
         print(f"[1/3] Đang nhận dữ liệu...")
-        
-        # Nhận độ dài
         raw_msglen = recvall(sock, 4)
         msglen = struct.unpack('>I', raw_msglen)[0]
-        
-        # Nhận dữ liệu
         encrypted = pickle.loads(recvall(sock, msglen))
         print(f"[2/3] Đã nhận {msglen} bytes")
-
-        # Giải mã
         start = time.perf_counter()
         if method == 'aes':
             decrypted = aes_demo.decrypt(encrypted)
@@ -62,7 +51,6 @@ def recv_data(sock, method=ENCRYPTION_METHOD):
         elif method == 'rsa':
             decrypted = rsa_demo.decrypt(encrypted)
         print(f"[3/3] Giải mã {method} xong ({time.perf_counter()-start:.3f}s)")
-
         return eval(decrypted)
     except Exception as e:
         print(f"[LỖI] Nhận thất bại: {e}")
